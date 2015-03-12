@@ -6,22 +6,32 @@ class profile::wordpress::integrated(
   include ::mysql::client
   include ::mysql::server
 
-  class { 'apache':
-    default_vhost => false,
+  class { 'php':
+    fpm => true,
   }
 
-  class { '::apache::mod::php': }
+  class { 'nginx': }
 
-  apache::vhost { $::fqdn:
-    docroot => $install_dir,
-    port    => 80,
+  nginx::resource::vhost { $::fqdn:
+    www_root    => $install_dir,
   }
 
-  apache::listen { '80': }
-
-  class { '::mysql::bindings::php':
-    notify => Class['::apache'],
+  nginx::resource::location { "${::fqdn}_root":
+    vhost       => $::fqdn,
+    location    => "~ \.php$",
+    index_files => ['index.php', 'index.html', 'index.htm'],
+    www_root    => $install_dir,
+    proxy       => undef,
+    fastcgi     => "127.0.0.1:9000",
+    fastcgi_script  => undef,
+    location_cfg_append => {
+      fastcgi_connect_timeout => '3m',
+      fastcgi_read_timeout    => '3m',
+      fastcgi_send_timeout    => '3m'
+    }
   }
+
+  class { '::mysql::bindings::php': }
 
   class { '::wordpress':
     db_user        => $db_user,
