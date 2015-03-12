@@ -5,4 +5,5 @@ Vagrant.configure(2) do |config|
   config.vm.hostname = "puppet"
   config.vm.synced_folder './', '/etc/puppet/modules/profile'
   config.vm.network :private_network, type: "dhcp"
+  config.vm.provision :shell, inline: 'iptables -F'
 end
