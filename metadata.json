@@ -1,0 +1,19 @@
+{
+  "name": "seteam-profile",
+  "version": "0.4.4",
+  "author": "Puppet Labs SE Team",
+  "summary": "Puppet Labs SE Team Profile Module",
+  "license": "Apache 2.0",
+  "source": "https://github.com/puppetlabs-seteam/puppet-module-profile.git",
+  "project_page": "https://github.com/puppetlabs-seteam/puppet-module-profile",
+  "issues_url": "https://github.com/puppetlabs-seteam/puppet-module-profile/issues",
+  "description": "Top-level profile-aggregator module to defining SE-Team-specific profiles",
+  "dependencies": [
+    {"name":"stahnma/epel","version_requirement":">= 0.0.3"},
+    {"name":"seteam/tomcat","version_requirement":">= 0.0.6"},
+    {"name":"nanliu/staging","version_requirement":">= 0.2.1"},
+    {"name":"seteam/splunk","version_requirement":">= 2.0.1"},
+    {"name":"hunner/wordpress","version_requirement":">= 1.0.0"},
+    {"name":"puppetlabs/apache","version_requirement":">= 1.1.0"}
+  ]
+}
