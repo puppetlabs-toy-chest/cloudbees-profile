@@ -6,6 +6,7 @@ class profile::wordpress::integrated(
   include ::mysql::client
   include ::mysql::server
 
+<<<<<<< HEAD
   service { 'httpd':
     ensure => stopped,
     enable => false,
