@@ -3,7 +3,10 @@ require 'spec_helper_acceptance'
 describe 'profile::wordpress::monolithic' do
   it 'should apply' do
     pp = <<-EOS
-      class { 'profile::wordpress::monolithic': }
+      class { 'profile::wordpress::monolithic':
+        db_user     => 'wordpress',
+        db_password => 'wordpress',
+      }
     EOS
 
     apply_manifest(pp, :catch_failures => true)
