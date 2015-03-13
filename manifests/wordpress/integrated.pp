@@ -1,4 +1,4 @@
-class profile::wordpress::monolithic(
+class profile::wordpress::integrated(
   $install_dir = '/opt/wordpress',
   $db_user,
   $db_password

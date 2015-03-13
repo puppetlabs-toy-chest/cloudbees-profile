@@ -1,5 +1,6 @@
 require 'beaker-rspec/spec_helper'
 require 'beaker-rspec/helpers/serverspec'
+require 'json'
 
 
 unless ENV['RS_PROVISION'] == 'no'
@@ -36,15 +37,22 @@ RSpec.configure do |c|
       if fact('osfamily') == 'RedHat'
         on host, puppet('module','install','stahnma/epel'), { :acceptable_exit_codes => [0,1] }
       end
+
       # Required for manifest to make mod_pagespeed repository available
       if fact('osfamily') == 'Debian'
         on host, puppet('module','install','puppetlabs-apt'), { :acceptable_exit_codes => [0,1] }
       end
-      on host, puppet('module','install','puppetlabs-stdlib'), { :acceptable_exit_codes => [0,1] }
-      on host, puppet('module','install','puppetlabs-concat', '--version 1.1.1', '--force'), { :acceptable_exit_codes => [0,1] }
-      on host, puppet('module','install','hunner-wordpress', '--version 1.0.0', '--force'), { :acceptable_exit_codes => [0,1] }
-      on host, puppet('module','install','puppetlabs-apache', '--version 1.1.1', '--force'), { :acceptable_exit_codes => [0,1] }
-      on host, puppet('module','install','puppetlabs-mysql', '--force'), { :acceptable_exit_codes => [0,1] }
+
+      #Flush the iptable
+      on host, 'iptables -F'
+
+      module_metadata = JSON::parse(IO.read("#{proj_root}/metadata.json"))
+
+      module_metadata['dependencies'].each do |dependency|
+        name = dependency['name']
+        version_string = dependency.has_key?('version_requirement') ? "--version  #{dependency['version_requirement']}" : String.new
+        on host, puppet('module','install',name,version_string), { :acceptable_exit_codes => [0,1] }
+      end
     end
   end
 end

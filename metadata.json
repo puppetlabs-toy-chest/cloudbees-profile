@@ -11,10 +11,11 @@
   "dependencies": [
     {"name":"stahnma/epel","version_requirement":">= 0.0.3"},
     {"name":"seteam/tomcat","version_requirement":">= 0.0.6"},
-    {"name":"nanliu/staging","version_requirement":">= 0.2.1"},
+    {"name":"nanliu/staging","version_requirement":">= 1.0.3"},
     {"name":"seteam/splunk","version_requirement":">= 2.0.1"},
     {"name":"hunner/wordpress","version_requirement":">= 1.0.0"},
-    {"name":"puppetlabs/apache","version_requirement":">= 1.1.0"}
-    {"name":"puppetlabs/mysql","version_requirement":">= 1.0.0"}
+    {"name":"puppetlabs/apache","version_requirement":">= 1.1.0"},
+    {"name":"puppetlabs/mysql","version_requirement":">= 3.0.0"},
+    {"name":"puppetlabs/concat","version_requirement":">= 1.2.0"}
   ]
 }
