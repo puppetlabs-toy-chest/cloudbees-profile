@@ -15,7 +15,7 @@
     {"name":"seteam/splunk","version_requirement":">= 2.0.1"},
     {"name":"hunner/wordpress","version_requirement":">= 1.0.0"},
     {"name":"jfryman/nginx","version_requirement":">= 0.2.2"},
-    {"name":"puppetlabs/mysql","version_requirement":">= 1.0.0"},
+    {"name":"puppetlabs/mysql","version_requirement":">= 3.3.0"},
     {"name":"mayflower/php","version_requirement":">= 3.1.0"}
   ]
 }
