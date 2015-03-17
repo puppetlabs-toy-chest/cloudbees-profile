@@ -6,6 +6,11 @@ class profile::wordpress::integrated(
   include ::mysql::client
   include ::mysql::server
 
+  service { 'httpd':
+    ensure => stopped,
+    enable => false,
+  }
+
   class { 'php':
     fpm => true,
   }
