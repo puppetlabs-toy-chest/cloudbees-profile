@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1.0">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty plugin="unique-id@1.2">
+      <id>
+        <id>N2U0MGQ4NWMtNjhkYy00NWUzLWE5YW</id>
+      </id>
+    </org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@1.0">
+    <script>node(&apos;vagrant&apos;) {
+
+  //STAGING
+  stage &apos;staging&apos;
+  git url:&apos;git@github.com:puppetlabs/cloudbees-site&apos;, branch:&apos;staging&apos;
+  def sut_host = &apos;wordpress-staging.pdx.puppetlabs.demo&apos;
+  def VAGRANT_PREFIX = &quot;cd ~/projects/cloudbees-demo;&quot;
+  def SUT_PREFIX = &quot;${VAGRANT_PREFIX} vagrant ssh ${sut_host} -c &apos;facter ipaddress_enp0s8&apos;&quot;
+  sh &quot;${VAGRANT_PREFIX} vagrant ssh /master/ -c &apos;sudo -i r10k deploy environment -p staging&apos;&quot;
+  sh &quot;${VAGRANT_PREFIX} vagrant provision ${sut_host} || true&quot;
+  checkpoint(&quot;staging_applied&quot;)
+  sh &quot;WORDPRESS_HOST=`${SUT_PREFIX}` rspec spec/&quot;
+  checkpoint(&quot;staging_complete&quot;)
+  input &quot;Apply to production?&quot;
+
+  //PRODUCTION
+  stage &apos;production&apos;
+  sh &quot;git co production&quot;
+  sh &quot;git merge origin/staging&quot;
+  sh &quot;git push origin HEAD&quot;
+  sh &quot;${VAGRANT_PREFIX} vagrant ssh /master/ -c &apos;sudo -i r10k deploy environment -p production&apos;&quot;
+
+  def prod_host = &apos;wordpress.pdx.puppetlabs.demo&apos;
+  sh &quot;${VAGRANT_PREFIX} vagrant provision ${prod_host}&quot;
+}</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+</flow-definition>
