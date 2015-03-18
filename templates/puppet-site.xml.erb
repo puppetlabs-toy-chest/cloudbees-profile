@@ -34,7 +34,7 @@
   sh &quot;${VAGRANT_PREFIX} vagrant ssh /master/ -c &apos;sudo -i r10k deploy environment -p production&apos;&quot;
 
   def prod_host = &apos;wordpress.pdx.puppetlabs.demo&apos;
-  sh &quot;${VAGRANT_PREFIX} vagrant provision ${prod_host}&quot;
+  sh &quot;${VAGRANT_PREFIX} vagrant provision ${prod_host} || true&quot;
 }</script>
     <sandbox>false</sandbox>
   </definition>
