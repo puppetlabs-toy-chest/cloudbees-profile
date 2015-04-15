@@ -1,40 +1,56 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@1.0">
+<flow-definition plugin="workflow-job@1.4">
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty plugin="unique-id@1.2">
       <id>
-        <id>N2U0MGQ4NWMtNjhkYy00NWUzLWE5YW</id>
+        <id>ZmJhYmIyMDItNTQ5ZS00NGU3LTkwZW</id>
       </id>
     </org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@1.0">
-    <script>node(&apos;vagrant&apos;) {
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@1.4">
+    <script>node(&apos;r10k&apos;) {
+   stage &apos;Deploy to Staging&apos;
+   sh &apos;sudo /opt/puppet/bin/r10k deploy environment -p staging&apos;
+   checkpoint(&apos;staging deployed in Puppet Enterprise&apos;)
 
-  //STAGING
-  stage &apos;staging&apos;
+   sh &apos;/opt/puppet/bin/mco puppet runonce -I wordpress-staging.pdx.puppetlabs.demo&apos;
+   checkpoint(&apos;staging applied&apos;)
+}
+
+node(&apos;master&apos;) {
+  stage &apos;Role Acceptance Tests&apos;
+  git url:&apos;https://github.com/puppetlabs/cloudbees-role&apos;
+  env.ACCEPTANCE_WORDPRESS_URL = &apos;http://wordpress-staging.pdx.puppetlabs.demo&apos;
+
+  sh &apos;/opt/puppet/bin/rspec spec/acceptance&apos;
+  checkpoint(&apos;acceptance tests run&apos;)
+  input &apos;Apply to production?&apos;
+}
+
+node(&apos;master&apos;) {
+  stage &apos;Deploy to Production&apos;
   git url:&apos;git@github.com:puppetlabs/cloudbees-site&apos;, branch:&apos;staging&apos;
-  def sut_host = &apos;wordpress-staging.pdx.puppetlabs.demo&apos;
-  def VAGRANT_PREFIX = &quot;cd ~/projects/cloudbees-demo;&quot;
-  def SUT_PREFIX = &quot;${VAGRANT_PREFIX} vagrant ssh ${sut_host} -c &apos;facter ipaddress_enp0s8&apos;&quot;
-  sh &quot;${VAGRANT_PREFIX} vagrant ssh /master/ -c &apos;sudo -i r10k deploy environment -p staging&apos;&quot;
-  sh &quot;${VAGRANT_PREFIX} vagrant provision ${sut_host} || true&quot;
-  checkpoint(&quot;staging_applied&quot;)
-  sh &quot;WORDPRESS_HOST=`${SUT_PREFIX}` rspec spec/&quot;
-  checkpoint(&quot;staging_complete&quot;)
-  input &quot;Apply to production?&quot;
-
-  //PRODUCTION
-  stage &apos;production&apos;
   sh &quot;git co production&quot;
   sh &quot;git merge origin/staging&quot;
   sh &quot;git push origin HEAD&quot;
-  sh &quot;${VAGRANT_PREFIX} vagrant ssh /master/ -c &apos;sudo -i r10k deploy environment -p production&apos;&quot;
+}
 
-  def prod_host = &apos;wordpress.pdx.puppetlabs.demo&apos;
-  sh &quot;${VAGRANT_PREFIX} vagrant provision ${prod_host} || true&quot;
+node(&apos;r10k&apos;) {
+   sh &apos;sudo /opt/puppet/bin/r10k deploy environment -p production&apos;
+   checkpoint(&apos;production deployed in Puppet Enterprise&apos;)
+
+   sh &apos;/opt/puppet/bin/mco puppet runonce -I wordpress.pdx.puppetlabs.demo&apos;
+   checkpoint(&apos;production applied&apos;)
+}
+
+node(&apos;master&apos;) {
+  stage &apos;Post Deploy Tests&apos;
+  env.ACCEPTANCE_WORDPRESS_URL = &apos;http://wordpress.pdx.puppetlabs.demo&apos;
+
+  sh &apos;/opt/puppet/bin/rspec spec/acceptance&apos;
 }</script>
     <sandbox>false</sandbox>
   </definition>
