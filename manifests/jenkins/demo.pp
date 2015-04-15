@@ -1,6 +1,8 @@
-class profile::jenkins_enterprise {
+class profile::jenkins::demo {
   include ::jenkins
   include ::git
+
+  jenkins::plugin { 'swarm': }
 
   jenkins::job { 'puppet-site':
     config => template('profile/puppet-site.xml.erb'),
