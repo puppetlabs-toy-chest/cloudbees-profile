@@ -1,6 +1,4 @@
 class profile::firewall {
-  include stdlib::stages
-
   case $::osfamily {
     default: {
 
