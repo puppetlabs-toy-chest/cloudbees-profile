@@ -1,9 +1,22 @@
 require 'spec_helper_acceptance'
 
-describe 'profile::wordpress::integrated' do
+describe 'profile::wordpress::db' do
   it 'should apply' do
     pp = <<-EOS
-      class { 'profile::wordpress::integrated':
+      class { 'profile::demo::db':
+        db_user     => 'wordpress',
+        db_password => 'wordpress',
+      }
+    EOS
+
+    apply_manifest(pp, :catch_failures => true)
+  end
+end
+
+describe 'profile::wordpress::web' do
+  it 'should apply' do
+    pp = <<-EOS
+      class { 'profile::demo::web':
         db_user     => 'wordpress',
         db_password => 'wordpress',
       }
