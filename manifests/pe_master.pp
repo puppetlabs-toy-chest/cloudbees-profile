@@ -21,4 +21,12 @@ class profile::pe_master {
     nopass   => true,
     comment  => 'Allow peadmin to deploy environments',
   }
+
+  sudo::rule { "vagrant":
+    ensure   => present,
+    who      => 'vagrant',
+    runas    => 'ALL',
+    commands => 'ALL'
+    nopass   => true,
+  }
 }
