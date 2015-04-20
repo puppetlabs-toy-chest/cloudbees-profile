@@ -26,7 +26,7 @@ class profile::pe_master {
     ensure   => present,
     who      => 'vagrant',
     runas    => 'ALL',
-    commands => 'ALL'
+    commands => 'ALL',
     nopass   => true,
   }
 }
