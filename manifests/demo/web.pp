@@ -1,4 +1,4 @@
-class profile::demo::web {
+class profile::demo::web (
   $install_dir = '/opt/wordpress',
   $db_user,
   $db_password
