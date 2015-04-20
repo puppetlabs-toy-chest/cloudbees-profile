@@ -5,21 +5,39 @@ class profile::demo::web (
 ) {
   include ::mysql::client
   
-  class { 'apache':
-    default_vhost => false,
+
+  service { 'httpd':
+    ensure => stopped,
+    enable => false,
   }
 
-  class { '::apache::mod::php': }
-
-  apache::vhost { $::fqdn:
-    docroot => $install_dir,
-    port    => 80,
+  class { 'php':
+    fpm => true,
   }
 
-  apache::listen { '80': }
+  class { 'nginx': }
+
+  nginx::resource::vhost { $::fqdn:
+    www_root    => $install_dir,
+  }
+
+  nginx::resource::location { "${::fqdn}_root":
+    vhost       => $::fqdn,
+    location    => "~ \.php$",
+    index_files => ['index.php', 'index.html', 'index.htm'],
+    www_root    => $install_dir,
+    proxy       => undef,
+    fastcgi     => "127.0.0.1:9000",
+    fastcgi_script  => undef,
+    location_cfg_append => {
+      fastcgi_connect_timeout => '3m',
+      fastcgi_read_timeout    => '3m',
+      fastcgi_send_timeout    => '3m'
+    }
+  }
 
   class { '::mysql::bindings::php':
-    notify => Class['::apache'],
+    notify => Class['::nginx'],
   }
 
   class { '::wordpress':
