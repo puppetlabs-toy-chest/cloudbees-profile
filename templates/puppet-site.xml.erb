@@ -6,50 +6,65 @@
   <properties>
     <org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty plugin="unique-id@1.2">
       <id>
-        <id>ZmJhYmIyMDItNTQ5ZS00NGU3LTkwZW</id>
+        <id>YmI1NDU2OGMtMjYxMy00NzFmLTg4ZT</id>
       </id>
     </org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty>
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@1.4">
-    <script>node(&apos;r10k&apos;) {
-   stage &apos;Deploy to Staging&apos;
-   sh &apos;sudo /opt/puppet/bin/r10k deploy environment -p staging&apos;
-   checkpoint(&apos;staging deployed in Puppet Enterprise&apos;)
-
-   sh &apos;/opt/puppet/bin/mco puppet runonce -I wordpress-staging.pdx.puppetlabs.demo&apos;
-   checkpoint(&apos;staging applied&apos;)
+    <script>def merge(source, destination) {
+  sh &quot;git checkout ${destination}&quot;
+  sh &quot;git merge origin/${source}&quot;
+  sh &quot;git push origin HEAD&quot;
 }
 
+def r10k(environment) {
+  node(&apos;r10k&apos;) {
+     sh &quot;sudo /opt/puppet/bin/r10k deploy environment -p ${environment}&quot;
+  }
+}
+
+def runpuppet(identity) {
+  node(&apos;mco&apos;) {
+    sh &quot;/opt/puppet/bin/mco puppet runonce -I ${identity}&quot;
+  }
+}
+
+stage &apos;Deploy to Staging&apos;
+r10k &apos;staging&apos;
+checkpoint(&apos;staging deployed in Puppet Enterprise&apos;)
+
+runpuppet &apos;wordpress-staging.pdx.puppetlabs.demo&apos;
+checkpoint(&apos;staging applied&apos;)
+
+stage &apos;Role Acceptance Tests&apos;
+
 node(&apos;master&apos;) {
-  stage &apos;Role Acceptance Tests&apos;
   git url:&apos;https://github.com/puppetlabs/cloudbees-role&apos;
   env.ACCEPTANCE_WORDPRESS_URL = &apos;http://wordpress-staging.pdx.puppetlabs.demo&apos;
 
   sh &apos;/opt/puppet/bin/rspec spec/acceptance&apos;
-  checkpoint(&apos;acceptance tests run&apos;)
-  input &apos;Apply to production?&apos;
 }
+
+checkpoint(&apos;acceptance tests run&apos;)
+input &apos;Apply to production?&apos;
+
+stage &apos;Deploy to Production&apos;
+node(&apos;master&apos;) {
+  sh &quot;whoami&quot;
+  git url:&apos;git@github.com:puppetlabs/cloudbees-site&apos;
+  merge &apos;staging&apos;, &apos;production&apos;
+}
+
+r10k &apos;production&apos;
+checkpoint(&apos;production deployed in Puppet Enterprise&apos;)
+
+runpuppet &apos;wordpress.pdx.puppetlabs.demo&apos;
+checkpoint(&apos;production applied&apos;)
+
+stage &apos;Post Deploy Tests&apos;
 
 node(&apos;master&apos;) {
-  stage &apos;Deploy to Production&apos;
-  git url:&apos;git@github.com:puppetlabs/cloudbees-site&apos;, branch:&apos;staging&apos;
-  sh &quot;git co production&quot;
-  sh &quot;git merge origin/staging&quot;
-  sh &quot;git push origin HEAD&quot;
-}
-
-node(&apos;r10k&apos;) {
-   sh &apos;sudo /opt/puppet/bin/r10k deploy environment -p production&apos;
-   checkpoint(&apos;production deployed in Puppet Enterprise&apos;)
-
-   sh &apos;/opt/puppet/bin/mco puppet runonce -I wordpress.pdx.puppetlabs.demo&apos;
-   checkpoint(&apos;production applied&apos;)
-}
-
-node(&apos;master&apos;) {
-  stage &apos;Post Deploy Tests&apos;
   env.ACCEPTANCE_WORDPRESS_URL = &apos;http://wordpress.pdx.puppetlabs.demo&apos;
-
   sh &apos;/opt/puppet/bin/rspec spec/acceptance&apos;
 }</script>
     <sandbox>false</sandbox>
