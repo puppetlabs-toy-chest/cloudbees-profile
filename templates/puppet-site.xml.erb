@@ -6,7 +6,7 @@
   <properties>
     <org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty plugin="unique-id@1.2">
       <id>
-        <id>NGQ0MzliYmEtNTg1Zi00NmYyLTgwMD</id>
+        <id>ZjA0MTkwZTMtZjkwMC00YzQ1LWE2Zj</id>
       </id>
     </org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty>
   </properties>
@@ -22,11 +22,28 @@ def r10k(environment) {
      sh &quot;sudo /opt/puppet/bin/r10k deploy environment -p ${environment}&quot;
      sh &quot;sudo service pe-puppetserver restart&quot;
   }
+  sleep 10
+}
+
+def puppetstatus(identity) {
+  node(&apos;mco&apos;) {
+    sh &quot;mco rpc puppet status -I ${identity} | grep ^[[:space:]]*Status | awk &apos;{ print \$2 }&apos; &gt; /tmp/runstatus&quot;
+    readFile(&apos;/tmp/runstatus&apos;)
+  }
 }
 
 def runpuppet(identity) {
+  while(puppetstatus(identity) == &apos;applying&apos;) {
+    sleep 1
+  }
+
   node(&apos;mco&apos;) {
     sh &quot;/opt/puppet/bin/mco puppet runonce -I ${identity}&quot;
+    sleep 1
+  }
+
+  while(puppetstatus(identity) == &apos;applying&apos;) {
+    sleep 1
   }
 }
 
