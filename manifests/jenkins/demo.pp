@@ -20,4 +20,11 @@ class profile::jenkins::demo {
   user { 'jenkins':
     shell => '/bin/bash',
   }
+
+  file { '/var/lib/jenkins/.ssh/known_hosts':
+    owner  => 'jenkins',
+    group  => 'jenkins',
+    mode   => 0644,
+    source => 'puppet:///modules/profile/known_hosts',
+  }
 }
