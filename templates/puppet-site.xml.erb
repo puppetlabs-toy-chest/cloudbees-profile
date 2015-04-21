@@ -20,6 +20,7 @@
 def r10k(environment) {
   node(&apos;r10k&apos;) {
      sh &quot;sudo /opt/puppet/bin/r10k deploy environment -p ${environment}&quot;
+     sh &quot;sudo service pe-puppetserver restart&quot;
   }
 }
 

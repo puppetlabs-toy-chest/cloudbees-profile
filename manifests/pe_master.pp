@@ -22,6 +22,15 @@ class profile::pe_master {
     comment  => 'Allow peadmin to deploy environments',
   }
 
+  sudo::rule { "pe_puppetserver_restart_rule":
+    ensure => present,
+    who    => 'peadmin',
+    runas  => 'root',
+    commands => '/sbin/service pe-puppetserver restart',
+    nopass   => true,
+    comment  => 'Allow peadmin to restart the puppetserver service',
+  }
+
   sudo::rule { "vagrant":
     ensure   => present,
     who      => 'vagrant',
