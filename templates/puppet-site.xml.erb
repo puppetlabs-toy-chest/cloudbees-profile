@@ -27,7 +27,7 @@ def r10k(environment) {
 
 def puppetstatus(identity) {
   node(&apos;mco&apos;) {
-    sh &quot;mco rpc puppet status -I ${identity} | grep ^[[:space:]]*Status | awk &apos;{ print \$2 }&apos; &gt; /tmp/runstatus&quot;
+    sh &quot;mco rpc puppet status -I ${identity} | grep ^[[:space:]]*Status | awk &apos;{ printf \$2 }&apos; &gt; /tmp/runstatus&quot;
     readFile(&apos;/tmp/runstatus&apos;)
   }
 }
