@@ -33,16 +33,16 @@ def puppetstatus(identity) {
 }
 
 def runpuppet(identity) {
-  while(puppetstatus(identity) != &apos;idling&apos;) {
+  while(puppetstatus(identity) == &apos;applying&apos;) {
     sleep 1
   }
 
   node(&apos;mco&apos;) {
-    sh &quot;/opt/puppet/bin/mco puppet runonce -I ${identity} force=true&quot;
+    sh &quot;/opt/puppet/bin/mco rpc service restart service=pe-puppet -I ${identity}&quot;
     sleep 1
   }
 
-  while(puppetstatus(identity) != &apos;idling&apos;) {
+  while(puppetstatus(identity) == &apos;applying&apos;) {
     sleep 1
   }
 }
