@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@1.4">
+<flow-definition plugin="workflow-job@1.0">
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty plugin="unique-id@1.2">
       <id>
-        <id>YmI1NDU2OGMtMjYxMy00NzFmLTg4ZT</id>
+        <id>NGQ0MzliYmEtNTg1Zi00NmYyLTgwMD</id>
       </id>
     </org.jenkinsci.plugins.uniqueid.impl.JobIdStore_-JobIdProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@1.4">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@1.0">
     <script>def merge(source, destination) {
   sh &quot;git checkout ${destination}&quot;
   sh &quot;git merge origin/${source}&quot;
@@ -50,7 +50,6 @@ input &apos;Apply to production?&apos;
 
 stage &apos;Deploy to Production&apos;
 node(&apos;master&apos;) {
-  sh &quot;whoami&quot;
   git url:&apos;git@github.com:puppetlabs/cloudbees-site&apos;
   merge &apos;staging&apos;, &apos;production&apos;
 }
@@ -64,7 +63,9 @@ checkpoint(&apos;production applied&apos;)
 stage &apos;Post Deploy Tests&apos;
 
 node(&apos;master&apos;) {
+  git url:&apos;https://github.com/puppetlabs/cloudbees-role&apos;
   env.ACCEPTANCE_WORDPRESS_URL = &apos;http://wordpress.pdx.puppetlabs.demo&apos;
+
   sh &apos;/opt/puppet/bin/rspec spec/acceptance&apos;
 }</script>
     <sandbox>false</sandbox>
