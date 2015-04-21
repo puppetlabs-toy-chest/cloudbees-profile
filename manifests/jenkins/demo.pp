@@ -11,4 +11,13 @@ class profile::jenkins::demo {
   jenkins::job { 'profile-module':
     config => template('profile/profile-module.xml.erb'),
   }
+
+  package { 'rspec':
+    ensure   => installed,
+    provider => pe_gem,
+  }
+
+  user { 'jenkins':
+    shell => '/bin/bash',
+  }
 }
